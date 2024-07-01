@@ -152,12 +152,12 @@ class WeChatGPT:
             """处理私聊消息"""
             log.info(f"{msg.user.NickName}: {msg.text}")
 
-            if msg.text in ['不错', '不好']:
+            if msg.text in ['不错', '不好', 'good', 'bad']:
                 last_messages = self.history.get(msg.user.userName, [])[-2:]
                 if len(last_messages) == 2:
                     user_message = last_messages[0]['content']
                     assistant_message = last_messages[1]['content']
-                    self.save_feedback(user_message, assistant_message, msg.text == '不错')
+                    self.save_feedback(user_message, assistant_message, msg.text == '不错' or 'good')
                 msg.user.send('谢谢你的反馈！')
             elif msg.text in ['1', '2']:
                 last_messages = self.history.get(msg.user.userName, [])
