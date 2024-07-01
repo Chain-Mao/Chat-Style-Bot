@@ -330,14 +330,12 @@ KTO 优化的数据格式如下，其中 `user` 表示问题，`assistant` 表�
 如果您的训练数据为纯文本而非问答形式的数据，则无法用指令监督微调的方式，这时则需要通过增量预训练进行无监督学习。数据格式要求如下：
 
 ```json
-[
-  {
-    "text": "Be sure to tune in and watch Donald Trump on Late Night with David Letterman as he presents the Top Ten List tonight!"
-  },
-  {
-    "text": "Donald Trump will be appearing on The View tomorrow morning to discuss Celebrity Apprentice and his new book Think Like A Champion!"
-  }
-]
+{
+  "text": "Be sure to tune in and watch Donald Trump on Late Night with David Letterman as he presents the Top Ten List tonight!"
+},
+{
+  "text": "Donald Trump will be appearing on The View tomorrow morning to discuss Celebrity Apprentice and his new book Think Like A Champion!"
+}
 ```
 
 本项目提供了预处理后的名人普通文本数据，如[特朗普](data\trump.json)和[马斯克](data\elon_musk.json)发布的推特内容。您可以通过以下命令进行增量预训练。

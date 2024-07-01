@@ -329,14 +329,12 @@ The data format for KTO optimization is as follows. `user` represents the questi
 If your training data is plain text rather than question-and-answer format, you cannot use the instruction-based supervised fine-tuning method. In this case, you need to perform unsupervised learning through incremental pretraining. Data format requirements are as follows:
 
 ```json
-[
-  {
-    "text": "Be sure to tune in and watch Donald Trump on Late Night with David Letterman as he presents the Top Ten List tonight!"
-  },
-  {
-    "text": "Donald Trump will be appearing on The View tomorrow morning to discuss Celebrity Apprentice and his new book Think Like A Champion!"
-  }
-]
+{
+  "text": "Be sure to tune in and watch Donald Trump on Late Night with David Letterman as he presents the Top Ten List tonight!"
+},
+{
+  "text": "Donald Trump will be appearing on The View tomorrow morning to discuss Celebrity Apprentice and his new book Think Like A Champion!"
+}
 ```
 
 This project provides preprocessed plain text data from celebrities, such as tweets posted by [Trump](data\trump.json) and [Elon Musk](data\elon_musk.json). You can perform incremental pretraining using the following command:
