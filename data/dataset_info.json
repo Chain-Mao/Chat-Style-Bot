@@ -1,0 +1,27 @@
+{
+  "chat_records": {
+    "file_name": "chat_records.json",
+    "columns": {
+      "prompt": "instruction",
+      "query": "input",
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "identity": {
+    "file_name": "identity.json"
+  },
+  "trump": {
+    "file_name": "trump.json",
+    "columns": {
+      "prompt": "text"
+    }
+  },
+  "elon_musk": {
+    "file_name": "elon_musk.json",
+    "columns": {
+      "prompt": "text"
+    }
+  }
+}

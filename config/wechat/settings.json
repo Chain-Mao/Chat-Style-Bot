@@ -1,0 +1,32 @@
+{
+    "llama3_args": {
+        "model_name_or_path": "/data1/LLaMA-Factory/Llama3-8B-Chinese-Chat",
+        "adapter_name_or_path": "/data1/LLaMA-Factory/saves/llama3-8b/lora/sft/checkpoint-500",
+        "template": "llama3",
+        "finetuning_type": "lora",
+        "repetition_penalty": 1.2,
+        "temperature": 0.5,
+        "max_length": 50,
+        "top_p": 0.65
+    },
+    "qwen2_args": {
+        "model_name_or_path": "Qwen2-7B-Instruct",
+        "adapter_name_or_path": "saves/qwen2-7b/lora/sft/checkpoint-800",
+        "template": "qwen",
+        "finetuning_type": "lora",
+        "repetition_penalty": 1.2,
+        "temperature": 0.5,
+        "max_length": 50,
+        "top_p": 0.65
+    },
+    "glm4_args": {
+        "model_name_or_path": "Glm4-9B-Chat",
+        "adapter_name_or_path": "saves/glm4-9b/lora/sft/checkpoint-400",
+        "template": "glm4",
+        "finetuning_type": "lora",
+        "repetition_penalty": 1.2,
+        "temperature": 0.5,
+        "max_length": 50,
+        "top_p": 0.65
+    }
+}
