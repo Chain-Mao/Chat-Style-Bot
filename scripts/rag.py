@@ -33,7 +33,7 @@ def messages_to_prompt(messages, model):
             prompt = "system\n" + prompt
         prompt = prompt + "assistant\n"
 
-    elif model == "qwen":
+    elif model == "qwen2":
         for message in messages:
             if message.role == "system":
                 prompt += f"system\n{message.content}\n"
@@ -52,6 +52,8 @@ def messages_to_prompt(messages, model):
             elif message.role == "assistant":
                 prompt += f"\n{message.content}\n"
         prompt = "[gMASK]<sop>" + prompt + "\n"
+    else:
+        raise ValueError('暂不支持的该模型，但您可以自行仿照已有代码扩展该模型')
 
     return prompt
 
