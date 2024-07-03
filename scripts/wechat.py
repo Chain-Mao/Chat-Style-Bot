@@ -33,7 +33,7 @@ signal.signal(signal.SIGTERM, stop_program)
 class WeChatGPT:
 
     def __init__(self):
-        itchat.auto_login(enableCmdQR=2, hotReload=True, statusStorageDir='./cookie.bin')
+        itchat.auto_login(enableCmdQR=2, hotReload=False, statusStorageDir='./cookie.bin')
 
         self.history = {}
         self.prompts = {}
@@ -128,16 +128,19 @@ class WeChatGPT:
         response_2[-1] = response_2[-1].replace('。', '')
         response_2 = ''.join(response_2)
 
-        msg.user.send(f"选出你更喜欢的回复：\n1: {response_1}\n2: {response_2}")
+        if response_1 == response_2:
+            msg.user.send(response_1)
+        else:
+            msg.user.send(f"选出你更喜欢的回复：\n1: {response_1}\n2: {response_2}")
         
-        # 记录双重回复，等待用户选择
-        self.history[msg.user.userName].append({
-            "content": user_message,
-            "role": "user",
-            "type": "dual_reply",
-            "response_1": response_1,
-            "response_2": response_2
-        })
+            # 记录双重回复，等待用户选择
+            self.history[msg.user.userName].append({
+                "content": user_message,
+                "role": "user",
+                "type": "dual_reply",
+                "response_1": response_1,
+                "response_2": response_2
+            })
 
     def run(self):
         @itchat.msg_register(FRIENDS)
@@ -157,7 +160,7 @@ class WeChatGPT:
                 if len(last_messages) == 2:
                     user_message = last_messages[0]['content']
                     assistant_message = last_messages[1]['content']
-                    self.save_feedback(user_message, assistant_message, msg.text == '不错' or 'good')
+                    self.save_feedback(user_message, assistant_message, msg.text in ['不错', 'good'])
                 msg.user.send('谢谢你的反馈！')
             elif msg.text in ['1', '2']:
                 last_messages = self.history.get(msg.user.userName, [])

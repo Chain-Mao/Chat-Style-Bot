@@ -18,8 +18,9 @@ Chat-Style-Bot is an intelligent chatbot designed to mimic the chatting style of
 - [Instruction Tuning](#instruction-tuning)
 - [Chat Inference](#chat-inference)
 - [WeChat Integration](#wechat-integration)
-- [Preference Optimization](#preference-optimization)
-- [Continue PreTraining](#continue-pretraining)
+- [Preference Optimization (Optional)](#preference-optimization)
+- [Continue PreTraining (Optional)](#continue-pretraining)
+- [Retrieval Augmented Generation (Optional)](#retrieval-augmented-generation)
 
 ## Environment Setup
 
@@ -361,15 +362,30 @@ If you encounter the `weight must be 2-D` problem, use `pip install -e ".[torch,
 If you need to import your own dataset, you can add your custom dataset in the dataset configuration file [data\dataset_info.json](data\dataset_info.json), and add the dataset name in the `dataset` entry of the model configuration file .yaml in the config directory.
 
 
+## Retrieval Augmented Generation
+
+In order to connect each model with historical chat data, we connect LlamaIndex and provide a tutorial example [scripts\rag.py](scripts\rag.py). It is designed to help users quickly deploy RAG technology using LlamaIndex and llama3, qwen2, glm4 and other models. The model combined with RAG will further improve the style imitation ability and the accuracy of details.
+
+In our case, we need to set up the language model, vector model, and chat history path, and execute the following command:
+
+```bash
+python scripts\rag.py --model llama3
+```
+
+For the vector model, you can use the `burge-base-en-v1.5` model to retrieve English documents and download the `burge-base-en-v1.5` model to retrieve Chinese documents. Depending on your computing resources, you can also choose `bge-large` or `bge-small` as a vector model, or adjust the context window size or text block size.
+
+
 ## Issues
 
 If you have any questions about our code or encounter difficulties during the experiment, please feel free to raise an issue or send an email to maochen981203@gmail.com.
 
-## TODO
+## ToDo
 
-- [x] Train a personal style imitation robot based on personal wechat chat data
-- [x] Adds incremental pre-training for unsupervised learning of ordinary text
-- [x] Acquire celebrity text datasets and train celebrity style imitation robots
+- [x] Train a personal style imitation robot based on personal wechat chat history data
+- [x] Supports incremental pre-training for unsupervised learning of common text
+- [x] Make datasets of celebrity text cleaning and train celebrity style imitation robots
+- [x] supports human preference optimization strategies for continuous learning during chat
+- [x] Supports retrieval augmented generation (RAG), retrieving valid information from chat history
 
 
 ## License
