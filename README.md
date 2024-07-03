@@ -1,31 +1,31 @@
 <div align="center"><img src="assets/logo.jpg"/></div>
 
-Please select the language you use: \[ English | [中文](README_zh.md) \]
+请选择您使用的语言：\[ 中文 | [English](README.md) \]
 
-## Project Overview
-Chat-Style-Bot is an intelligent chatbot designed to mimic the chatting style of a specified person. By analyzing and learning from WeChat chat logs, Chat-Style-Bot can emulate your unique chatting style, becoming your personal chat assistant. Whether communicating with friends or handling daily conversations, Chat-Style-Bot provides a natural and personalized interactive experience.
+## 项目简介
+Chat-Style-Bot是一个专门用于模仿指定人物聊天风格的智能聊天机器人。通过分析和学习微信聊天记录，Chat-Style-Bot能够模仿你的独特聊天风格，成为你的私人聊天助理。无论是与朋友交流还是处理日常对话，Chat-Style-Bot都能提供自然、个性化的互动体验。
 
-**Chat Style Mimicking Bot Integrated with WeChat Demonstration**
+**聊天风格模仿机器人接入微信效果展示**
 
 <div align="center"><img src="assets/example.png" width="80%"/></div>
 
-## Table of Contents
+## 目录
 
-- [Environment Setup](#environment-setup)
-- [Data Acquisition](#data-acquisition)
-- [Data Processing](#data-processing)
-- [Model Download](#model-download)
-- [Instruction Tuning](#instruction-tuning)
-- [Chat Inference](#chat-inference)
-- [WeChat Integration](#wechat-integration)
-- [Preference Optimization (Optional)](#preference-optimization)
-- [Continue PreTraining (Optional)](#continue-pretraining)
-- [Retrieval Augmented Generation (Optional)](#retrieval-augmented-generation)
+- [环境搭建](#环境搭建)
+- [微信数据获取](#微信数据获取)
+- [数据预处理](#数据预处理)
+- [模型下载](#模型下载)
+- [指令微调](#指令微调)
+- [推理聊天](#推理聊天)
+- [接入微信](#接入微信)
+- [偏好优化（可选）](#偏好优化)
+- [增量预训练（可选）](#增量预训练)
+- [检索增强生成（可选）](#检索增强生成)
 
-## Environment Setup
+## 环境搭建
 
 > [!IMPORTANT]
-> This step is mandatory.
+> 此步骤为必需。
 
 ```bash
 git clone https://github.com/Chain-Mao/Chat-Style-Bot.git
@@ -37,87 +37,90 @@ pip install -r requirements.txt
 ```
 
 > [!TIP]
-> The installation of PyTorch depends on the CUDA version of your machine, which can be determined by running nvcc -V.
-> 
-> If you encounter package conflicts, use pip install --no-deps -e . to resolve them.
+> pytorch的安装和本机的cuda版本相关，可通过 `nvcc -V` 确定cuda版本。
+>
+> 遇到包冲突时，可使用 `pip install --no-deps -e .` 解决。
 
-## Data Acquisition
 
-Here we use WeChat as an example. If you want to try data from other chat software, please keep the processed data format consistent with this project.
+## 微信数据获取
 
-First, download the WeChat chat export tool [Memotrace](https://github.com/gradio-app/gradio) on a Windows 11 or Windows 10 computer.
+此处以微信为例，如果您想尝试其他聊天软件的数据，请将处理后的数据格式和本项目保持一致。
 
-Before parsing the data, it is recommended to migrate your mobile chat data to your computer to increase the data volume. Refer to the [Memotrace usage tutorial](https://memotrace.cn/doc/posts/deploy/parser-db.html) for the specific data parsing process.
+请先在Windows11或Windows10系统电脑上下载微信聊天导出工具 [Memotrace](https://github.com/gradio-app/gradio)。
 
-After parsing the data, click "Data" -> "Export Chat Data (All)" -> "CSV" to export all chat data in CSV format.
+在解析数据前，建议先将手机聊天迁移到电脑上，以扩充数据的数量。具体的数据解析过程请移步至 [Memotrace使用教程](https://memotrace.cn/doc/posts/deploy/parser-db.html)。
 
-<div align="center"><img src="assets/memotrace.jpg" width="80%"/></div>
+数据解析完成后，点击“数据” -> “导出聊天数据(全部)” -> “CSV”，已导出CSV格式的全部聊天数据。
 
-## Data Processing
+<div align="center"><img src="assets/memotrace.jpg"  width="80%"/></div>
 
-After obtaining the WeChat chat CSV file, you need to convert it to JSON format for fine-tuning. You can do this with the following command.
 
-The `input_csv` parameter indicates the path to your exported CSV file, and `output_json` indicates the path where the JSON file will be saved. Your JSON file should be saved as data/chat_records.json.
+## 数据预处理
+
+得到微信聊天CSV文件后，需要将其转换为更适合用于微调的JSON数据，您可以直接通过以下命令完成。
+
+其中`input_csv`参数表示您导出的CSV文件地址，`output_json`表示JSON文件保存路径，您的JSON文件存储路径应设为data/chat_records.json。
 
 ```bash
 python scripts/preprocess.py --input_csv data/messages.csv --output_json data/chat_records.json
 ```
 
-The converted content should be in the following format, with some sample data provided in [data/example.json](data/example.json).
-
-[
-  {
-    "instruction": "Human instruction (required)",
-    "input": "Human input (optional)",
-    "output": "Model response (required)",
-    "system": "System prompt (optional)",
-    "history": [
-      ["First round instruction (optional)", "First round response (optional)"],
-      ["Second round instruction (optional)", "Second round response (optional)"]
-    ]
-  }
-]
-
-You can fill in the **optional data** input, system, and history as needed. These three parameters are not required and can be left empty.
-
-<details><summary>Optional Data Explanation</summary>
-
-During instruction fine-tuning, the content corresponding to the `instruction` column will be concatenated with the content corresponding to the `input` column as the human instruction, i.e., the human instruction is `instruction\ninput`. The content corresponding to the `output` column is the model response.
-
-If specified, the content corresponding to the `system` column will be used as a system prompt.
-
-The `history` column is a list of string tuples representing the instructions and responses of each round in the history messages. Note that during instruction fine-tuning, the response content in the history messages will also be used for model learning.
-
-</details>
-
-To achieve better style mimicry, you can add identity authentication tags to help the model understand the identities of itself and the developer. The tags include the bot's name and the developer's name.
-
-Identity authentication data is in [data/identity.json](data/identity.json), an example is shown below:
+转换后的内容应是如下格式，[data/example.json](data/example.json) 中提供了一些示范数据。
 
 ```json
 [
   {
-    "instruction": "Who are you?",
-    "input": "",
-    "output": "Hello, I am {{name}}, an AI assistant created by {{author}}. I can answer various questions, provide practical advice and help, and assist users with various tasks."
+    "instruction": "人类指令（必填）",
+    "input": "人类输入（选填）",
+    "output": "模型回答（必填）",
+    "system": "系统提示词（选填）",
+    "history": [
+      ["第一轮指令（选填）", "第一轮回答（选填）"],
+      ["第二轮指令（选填）", "第二轮回答（选填）"]
+    ]
   }
 ]
 ```
 
-You can replace the tags with the required information by executing the following command, where `name` indicates the model name, `author` indicates the developer, and `data/identity.json` indicates the identity tag file path.
+您可以根据需要填写**可选数据** input、system和history，这三个参数非必需，保持为空也没有问题。
+
+<details><summary>可选数据说明</summary>
+
+在指令监督微调时，`instruction` 列对应的内容会与 `input` 列对应的内容拼接后作为人类指令，即人类指令为 `instruction\ninput`。而 `output` 列对应的内容为模型回答。
+
+如果指定，`system` 列对应的内容将被作为系统提示词。
+
+`history` 列是由多个字符串二元组构成的列表，分别代表历史消息中每轮对话的指令和回答。注意在指令监督微调时，历史消息中的回答内容也会被用于模型学习。
+
+</details>
+
+为了实现更好的风格模仿效果，你可以加入身份认证相关的标签，辅助模型理解自己和开发者的身份，标签包括机器人的姓名和开发人员的姓名。
+
+身份认证数据在 [data/identity.json](data/identity.json)，示例如下：
+
+```json
+[
+  {
+    "instruction": "你是谁？",
+    "input": "",
+    "output": "您好，我是 {{name}}，一个由 {{author}} 发明的人工智能助手。我可以回答各种问题，提供实用的建议和帮助，帮助用户完成各种任务。"
+  }
+]
+```
+
+您可以通过执行以下命令将标签替换成您需要的信息，其中`name`表示模型名称，`author`表示开发人员，`data/identity.json`表示身份标签文件路径。
 
 ```bash
 python scripts/id_tag.py --name ZhangSan --author LiSi --file_path data/identity.json
 ```
 
-If you do not need authentication, you can change the `dataset` entry in a model configuration file such as [config\train\llama3_lora_sft_ds3.yaml](config\train\llama3_lora_sft_ds3.yaml), just keep `chat_records`.
+如果您不需要身份认证，可以在 如[config\train\llama3_lora_sft_ds3.yaml](config\train\llama3_lora_sft_ds3.yaml) 等模型配置文件中更改`dataset`条目，仅保留`chat_records`即可。
 
+## 模型下载
 
-## Model Download
+本项目支持Llama3、GLM4、Qwen2等当前主流模型。
 
-This project supports mainstream models such as Llama3, GLM4, and Qwen2.
-
-| Model Name              | Model Size      | Download Link                                                |
+| 模型名                  | 模型大小         | 下载地址                                                      |
 | ----------------------- | --------------- | ------------------------------------------------------------ |
 | GLM-4-9B-Chat           | 9B              | https://huggingface.co/THUDM/glm-4-9b-chat                   |
 | LLaMA-3-8B              | 8B              | https://huggingface.co/meta-llama/Meta-Llama-3-8B            |
@@ -125,185 +128,184 @@ This project supports mainstream models such as Llama3, GLM4, and Qwen2.
 | Qwen-2                  | 7B              | https://huggingface.co/Qwen/Qwen2-7B-Instruct                |
 
 > [!NOTE]
-> The LLaMA-3-8B model released by Meta does not support Chinese Q&A. If you fine-tune with Chinese data, please use the Llama3-8B-Chinese-Chat model.
-> 
-> The models listed above require approximately 16G-20G of VRAM for Lora fine-tuning, with at least one 3090 or 4090 GPU. Full-parameter fine-tuning requires more than 60G of VRAM. For fewer VRAM resources, use the QLora method.
+> Meta发布的LLaMA-3-8B模型没有中文问答的能力，如果您用中文数据微调，请使用Llama3-8B-Chinese-Chat模型。
+>
+> 上述几个模型Lora方法微调下约占用16G-20G显存，最少需要一张3090或4090显卡，全参数微调需要60G以上显存，更少的显存资源请使用QLora的方法。
 
-We recommend using the following command to download models from Huggingface. Add the uploader and model name on Huggingface after `resume-download`. To save the model files to a specified location, add the `local-dir` parameter, for example:
+我们推荐使用下述命令下载Huggingface上的模型。`resume-download` 后添加模型在Huggingface上的上传者和模型名称。下载模型文件并保存到指定位置时，需要添加 `local-dir` 参数，此时将文件保存至当前目录下，如：
 
 ```bash
 huggingface-cli download --resume-download Qwen/Qwen2-7B-Instruct --local-dir ./Qwen2-7B-Instruct
 ```
 
-If some model downloads require login confirmation, you can use the `huggingface-cli` login command to log in to your Huggingface account.
+如果部分模型的下载需要登录确认，可以使用命令 `huggingface-cli login` 登录您的Huggingface账户。
 
-If you are in mainland China and cannot access Huggingface, execute the following command before downloading the model to download files from the Huggingface domestic mirror source.
+如果您在中国内地，无法访问Huggingface，请在下载模型前在命令行执行以下命令，从Huggingface国内镜像源下载文件。
 
 ```bash
 export HF_ENDPOINT=https://hf-mirror.com 
 ```
 
-Besides Huggingface, users in mainland China can also check and download models from [ModelScope](https://modelscope.cn/models).
+除了Huggingface，中国内地的用户也可以在[魔搭社区](https://modelscope.cn/models)查看并下载模型。
 
 
-## Instruction Tuning
+## 指令微调
 
-#### Single GPU Lora Fine-Tuning (Recommended)
+#### 单卡 Lora 微调（推荐）
 
 ```bash
 llamafactory-cli train config/train/llama3_lora_sft.yaml
 ```
 
-#### Multi-GPU Lora Fine-Tuning (Recommended)
+#### 多卡 Lora 微调（推荐）
 
 ```bash
 FORCE_TORCHRUN=1 llamafactory-cli config/train/llama3_lora_sft_ds3.yaml
 ```
 
-#### Single GPU QLoRA Fine-Tuning
+#### 单卡 QLoRA 微调
 
 ```bash
 llamafactory-cli train config/train/llama3_qlora_sft.yaml
 ```
 
-#### Full-Parameter Fine-Tuning
+#### 全参数微调
 
 ```bash
 FORCE_TORCHRUN=1 llamafactory-cli train config/train/llama3_full_sft_ds3.yaml
 ```
 
-<details><summary>Configuration Parameters Explanation</summary>
+<details><summary>配置参数介绍</summary>
 
-In the .yaml file, fill in the model path after `model_name_or_path`, and `template` indicates the prompt template format for different models, which can be llama3, glm4, or qwen.
+.yaml文件中 `model_name_or_path` 后填写模型路径，`template` 表示不同模型的Prompt模板格式，可填llama3、glm4或qwen。
 
-The `quantization_bit` parameter for the QLora method can be 4/8-bit quantization.
+QLora方法 `quantization_bit ` 参数可选 4/8 比特量化。
 
-The Llama3 files in the config folder are more complete. If there is no corresponding configuration file for other models, you can create a new one based on the existing Llama3 configuration file format.
+config文件夹中Llama3文件较全，若没有其它模型对应的配置文件，可仿照已有Llama3的配置文件格式新建即可。
 
-If VRAM is insufficient:
+若显存不足：
 
-    - Adjust the truncation length `cutoff_len`. WeChat chat data is generally short, so setting it to 256 is sufficient.
-    - Reduce the `per_device_train_batch_size`, with a minimum of 1, to alleviate VRAM pressure.
+    - 可调节截断长度 `cutoff_len`，微信聊天数据一般较短，设为256即可。
+    - 可减小 `per_device_train_batch_size`，最小为1，以缓解显存压力。
 
 </details>
 
-### Merge LoRA Adapters
+### 合并 LoRA 适配器
 
 ```bash
 llamafactory-cli export config/merge_lora/llama3_lora_sft.yaml
 ```
 
-## Chat Inference
 
-#### Using Command Line Interface
+## 推理聊天
 
-Invoke the original model and Lora adapters without merging
+#### 使用命令行接口
+
+调用未合并的原模型和 Lora 适配器
 ```bash
 llamafactory-cli chat config/inference/llama3_lora_sft.yaml
 ```
-or directly invoke the merged model
+或 直接调用合并后的模型
 ```bash
 llamafactory-cli chat config/inference/llama3.yaml
 ```
 
-#### Using Browser Interface
+#### 使用浏览器界面
 
 ```bash
 llamafactory-cli webchat config/inference/llama3_lora_sft.yaml
 ```
 
-#### Launch OpenAI Style API
+#### 启动 OpenAI 风格 API
 
 ```bash
 llamafactory-cli api config/inference/llama3_lora_sft.yaml
 ```
 
 
-## WeChat Integration
+## 接入微信
 
 > [!IMPORTANT]
 >
-> For account security, it is recommended to use a WeChat sub-account to scan and log in. 
->
-> The WeChat account must be linked to a bank card to use.
+> 为了账号的安全起见，建议使用微信小号扫码登录，微信必须绑定银行卡才能使用。
 
-To configure the interface between the local model and WeChat, you should first configure the model path in [config/wechat/settings.json](config/wechat/settings.json).
+为了配置本地模型和微信间的接口，您应该先在[config/wechat/settings.json](config/wechat/settings.json)配置模型路径。
 
-Find the corresponding model in the three model configurations you have trained, and fill in the original model and Lora adapter paths in the `model_name_or_path` and `adapter_name_or_path` of the configuration, respectively. If you do not need to load the Lora adapter, leave `adapter_name_or_path` empty. If it is full-parameter fine-tuning, change `finetuning_type` to `full`.
+在三种模型配置中找到您训练的对应模型，将原始模型和Lora适配器路径分别填入该配置的 `model_name_or_path` 和 `adapter_name_or_path`。若不需要加载Lora适配器，则 `adapter_name_or_path` 为空即可。若是全参数微调，则将 `finetuning_type` 改为 `full`。
 
 ```bash
 python scripts/api_service.py --model_name llama3
 python scripts/wechat.py
 ```
 
-In the first command, the `model_name` hyperparameter can be llama3, qwen2, or glm4. After executing the first command, open a new terminal to execute the second command and scan the QR code displayed in the terminal to log in. You can let others chat with this bot account, or battle with the group chat bot in group chats by @ the group chat bot.
+第一条命令中 `model_name` 后超参数可以选llama3、qwen2或glm4。执行完第一条命令后，新开一个终端执行第二条命令，扫描终端显示的二维码即可登录。可以让别人和这个号的机器人聊天，或者在群聊中 @群聊机器人 互相Battle。
 
-<details><summary>QR Code Refresh Issue Solution</summary>
+<details><summary>二维码刷新过快问题解决</summary>
 
-This is a bug in the itchat package. First, find the itchat installation path with the command `pip show itchat-uos`.
+这是itchat包的一个Bug，首先通过命令 `pip show itchat-uos` 先找到itchat安装路径。
 
-In the login() function of xxx/site-packages/itchat/components/login.py, add a time.sleep(15) before entering the while not isLoggedIn loop.
+找到 xxx/site-packages/itchat/components/login.py 的 login() 函数中，在进入 while not isLoggedIn 循环前增加一个time.sleep(15)。
 
 <div align="center"><img src="assets/bug.png"  width="80%"/></div>
 
 </details>
 
-**At this point, if everything goes smoothly, you will have a chatbot that mimics your chat style and can chat fluently on WeChat.**
+**到此为止，如果一切顺利，您将会得到和您说话风格一样的聊天机器人，并能够在微信上对话自如。**
 
-If the model's responses become increasingly outlandish, it is likely due to overfitting caused by too many training epochs. Try loading a checkpoint with fewer training epochs.
-
-
-***The following three methods are not necessary***
+如果模型的回答开始天马行空，大概率是训练轮数太多导致过拟合，可以尝试使用训练轮数少一些的checkpoint加载模型。
 
 
-## Preference Optimization
+***下面三种方法非必须***
 
-If you want to further optimize the model to align its chatting style more closely with yours, you can provide feedback on the model's output during your conversations. Record the feedback results in a preference dataset and use optimization strategies like DPO and KTO for further fine-tuning.
 
-#### DPO Optimization
+## 偏好优化
+
+如果您希望进一步优化模型，使模型的聊天风格和您更加对齐。您可以在和机器人聊天过程中，对模型的输出进行反馈，并将反馈结果记录在偏好数据集中，使用DPO和KTO等优化策略进行进一步微调。
+
+#### DPO 优化
 
 ```bash
 llamafactory-cli train config/train/llama3_lora_dpo.yaml
 ```
 
-The data format for DPO optimization is as follows. `conversations` represents the question, `choesn` represents the answer you prefer, and `rejected` represents the answer you do not prefer. Refer to [data\dpo_zh_demo.json](data\dpo_zh_demo.json) for a specific example.
+DPO 优化的数据格式如下，其中 `conversations` 表示提问问题，`choesn` 表示您更倾向的回答，`rejected` 表示您更不倾向的回答，具体示例参考 [data\dpo_zh_demo.json](data\dpo_zh_demo.json)。
 
 ```json
 {
   "conversations": [
     {
       "from": "human",
-      "value": "How have you been lately, bro?"
+      "value": "最近怎么样，bro？"
     }
   ],
-  "chosen": {
+  "choesn": {
     "from": "gpt",
-    "value": "Pretty good, bro. How about you?"
+    "value": "还不错，bro，你最近怎么样？"
   },
   "rejected": {
     "from": "gpt",
-    "value": "Good."
+    "value": "挺好的"
   }
 }
 ```
 
-#### KTO Optimization
+#### KTO 优化
 
 ```bash
 llamafactory-cli train config/train/llama3_lora_kto.yaml
 ```
 
-The data format for KTO optimization is as follows. `user` represents the question, and `assistant` represents the answer. Label the answer you are satisfied with as `true` and the one you are not satisfied with as `false`. Refer to [data\kto_en_demo.json](data\kto_en_demo.json) for a specific example.
+KTO 优化的数据格式如下，其中 `user` 表示问题，`assistant` 表示回答，您满意的回答标记为 `true`，您不满意的回答标记为 `false`，具体示例参考 [data\kto_en_demo.json](data\kto_en_demo.json)。
 
 ```json
 {
   "messages": [
     {
-      "content": "How have you been lately, bro?",
+      "content": "最近怎么样，bro？",
       "role": "user"
     },
     {
-      "content": "Pretty good, bro. How about you?",
+      "content": "还不错，bro，你最近怎么样？",
       "role": "assistant"
     }
   ],
@@ -312,11 +314,11 @@ The data format for KTO optimization is as follows. `user` represents the questi
 {
   "messages": [
     {
-      "content": "How have you been lately, bro?",
+      "content": "最近怎么样，bro？",
       "role": "user"
     },
     {
-      "content": "Good.",
+      "content": "挺好的",
       "role": "assistant"
     }
   ],
@@ -325,16 +327,16 @@ The data format for KTO optimization is as follows. `user` represents the questi
 ```
 
 > [!TIP]
-> We have integrated human preference optimization strategies into wechat so that you can collect preference data in real time during wechat deployment and use it for subsequent preference optimization fine-tuning training.
+> 我们在微信中集成了人类偏好优化策略，便于您在微信部署过程中实时收集偏好数据，并将其用于后续偏好优化微调训练。
 >
-> For the DPO algorithm, the bot will have the probability to trigger two answers, you can type `1` or `2` to choose a more suitable answer for your chat style, and the data will be recorded in [data/dpo_records.json](data/dpo_records.json).
+> 对于 DPO算法，机器人会有概率触发两个回答，您可以打出 `1` 或者 `2` 以选择一个更符合您聊天风格的回答，数据将被记录在[data/dpo_records.json](data/dpo_records.json)。
 >
-> For the KTO algorithm, you can type `good` or `bad` after any answer from the robot, and the data will be recorded in [data/kto_records.json](data/kto_records.json).
+> 对于 KTO算法，您可以在机器人的任意回答后打出 `不错` 或者 `不好`，数据将被记录在[data/kto_records.json](data/kto_records.json)。
 
 
-## Continue PreTraining
+## 增量预训练
 
-If your training data is plain text rather than question-and-answer format, you cannot use the instruction-based supervised fine-tuning method. In this case, you need to perform unsupervised learning through incremental pretraining. Data format requirements are as follows:
+如果您的训练数据为纯文本而非问答形式的数据，则无法用指令监督微调的方式，这时则需要通过增量预训练进行无监督学习。数据格式要求如下：
 
 ```json
 {
@@ -345,56 +347,55 @@ If your training data is plain text rather than question-and-answer format, you 
 }
 ```
 
-This project provides preprocessed plain text data from celebrities, such as tweets posted by [Trump](data\trump.json) and [Elon Musk](data\elon_musk.json). You can perform incremental pretraining using the following command:
+本项目提供了预处理后的名人普通文本数据，如[特朗普](data\trump.json)和[马斯克](data\elon_musk.json)发布的推特内容。您可以通过以下命令进行增量预训练。
 
 ```bash
 llamafactory-cli train config/train/llama3_lora_pretrain.yaml
 ```
 
-<details><summary> Installation dependency issues </summary>
+<details><summary>安装依赖问题</summary>
 
-If you have problems installing the `mpi4py` package, install it with `conda install mpi4py`.
+如果 `mpi4py` 包安装出问题，请用 `conda install mpi4py` 进行安装。
 
-If you encounter the `weight must be 2-D` problem, use `pip install -e ".[torch,metrics]"` to resolve dependency conflicts.
+如果遇到 `weight must be 2-D` 问题，使用 `pip install -e ".[torch,metrics]"`解决依赖冲突。
 
 </details>
 
-If you need to import your own dataset, you can add your custom dataset in the dataset configuration file [data\dataset_info.json](data\dataset_info.json), and add the dataset name in the `dataset` entry of the model configuration file .yaml in the config directory.
+如果需要导入自己的数据集，您可以在数据集配置文件[data\dataset_info.json](data\dataset_info.json)中添加自定义的数据集，并在config中.yaml模型配置文件的`dataset`条目中添加数据集名称。
 
 
-## Retrieval Augmented Generation
+## 检索增强生成
 
-In order to connect each model with historical chat data, we connect LlamaIndex and provide a tutorial example [scripts\rag.py](scripts\rag.py). It is designed to help users quickly deploy RAG technology using LlamaIndex and llama3, qwen2, glm4 and other models. The model combined with RAG will further improve the style imitation ability and the accuracy of details.
+为了实现各模型与历史聊天数据的连接，我们接入了 LlamaIndex 并提供了教程案例[scripts\rag.py](scripts\rag.py)，旨在帮助用户利用 LlamaIndex 与 llama3、qwen2、glm4 等模型快速部署检索增强生成（RAG）技术。结合 RAG 后的模型会进一步提升风格模仿能力和细节问题的准确性。
 
-In our case, we need to set up the language model, vector model, and chat history path, and execute the following command:
+在案例中，我们需要设置语言模型、向量模型和聊天记录的路径，并执行以下命令：
 
 ```bash
 python scripts\rag.py --model llama3
 ```
 
-For the vector model, you can use the `burge-base-en-v1.5` model to retrieve English documents and download the `burge-base-en-v1.5` model to retrieve Chinese documents. Depending on your computing resources, you can also choose `bge-large` or `bge-small` as a vector model, or adjust the context window size or text block size.
+对于向量模型，您可以使用`bge-base-en-v1.5`模型来检索英文文档，下载`bge-base-zh-v1.5`模型以检索中文文档。根据您的计算资源，您还可以选择`bge-large`或`bge-small`作为向量模型，或调整上下文窗口大小或文本块大小。
 
 
-## Issues
+## 问题
 
-If you have any questions about our code or encounter difficulties during the experiment, please feel free to raise an issue or send an email to maochen981203@gmail.com.
+如果您对我们的代码有任何疑问或在实验过程中遇到难题，请随时发起Issues或发送电子邮件至maochen981203@gmail.com。
 
-## ToDo
-
-- [x] Train a personal style imitation robot based on personal wechat chat history data
-- [x] Supports incremental pre-training for unsupervised learning of common text
-- [x] Make datasets of celebrity text cleaning and train celebrity style imitation robots
-- [x] supports human preference optimization strategies for continuous learning during chat
-- [x] Supports retrieval augmented generation (RAG), retrieving valid information from chat history
-
-
-## License
-
-The code in this repository is open-sourced under the [Apache-2.0](LICENSE) license.
-
-When using model weights, please follow the corresponding model licenses: [GLM4](https://huggingface.co/THUDM/glm-4-9b/blob/main/LICENSE) / [LLaMA-3](https://llama.meta.com/llama3/license/) / [Qwen](https://github.com/QwenLM/Qwen/blob/main/Tongyi%20Qianwen%20LICENSE%20AGREEMENT).
+## 计划
+- [x] 根据个人微信聊天历史数据，训练个人风格模仿机器人
+- [x] 支持增量预训练功能，实现对普通文本的无监督学习
+- [x] 制作清洗名人文本数据集，训练名人风格模仿机器人
+- [x] 支持人类偏好优化策略，在聊天过程中持续学习
+- [x] 支持检索增强生成RAG，从聊天记录中检索有效信息
 
 
-## Acknowledgments
+## 协议
 
-This project benefits from [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) and [WeChatMsg](https://github.com/LC044/WeChatMsg)。
+本仓库的代码依照 [Apache-2.0](LICENSE) 协议开源。
+
+使用模型权重时，请遵循对应的模型协议：[GLM4](https://huggingface.co/THUDM/glm-4-9b/blob/main/LICENSE) / [LLaMA-3](https://llama.meta.com/llama3/license/) / [Qwen](https://github.com/QwenLM/Qwen/blob/main/Tongyi%20Qianwen%20LICENSE%20AGREEMENT)。
+
+
+## 致谢
+
+本项目受益于 [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) 和 [WeChatMsg](https://github.com/LC044/WeChatMsg)。
