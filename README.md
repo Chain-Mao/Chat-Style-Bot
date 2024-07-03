@@ -253,7 +253,7 @@ In the login() function of xxx/site-packages/itchat/components/login.py, add a t
 If the model's responses become increasingly outlandish, it is likely due to overfitting caused by too many training epochs. Try loading a checkpoint with fewer training epochs.
 
 
-***The following two training methods are not required***
+***The following three methods are not necessary***
 
 
 ## Preference Optimization
