@@ -1,6 +1,6 @@
 <div align="center"><img src="assets/logo.jpg"/></div>
 
-Please select the language you use / 请选择您使用的语言 : \[ [中文](README_zh.md) | English \]
+Please select the language you use / 请选择您使用的语言 : \[ English | [中文](README_zh.md) \]
 
 ## Project Overview
 Chat-Style-Bot is an intelligent chatbot designed to mimic the chatting style of a specified person. By analyzing and learning from WeChat chat logs, Chat-Style-Bot can emulate your unique chatting style, becoming your personal chat assistant. Whether communicating with friends or handling daily conversations, Chat-Style-Bot provides a natural and personalized interactive experience.
