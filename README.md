@@ -1,6 +1,6 @@
 <div align="center"><img src="assets/logo.jpg"/></div>
 
-请选择您使用的语言/Please select the language you use: \[ 中文 | [English](README_en.md) \]
+请选择您使用的语言 / Please select the language you use: \[ 中文 | [English](README_en.md) \]
 
 ## 项目简介
 Chat-Style-Bot是一个专门用于模仿指定人物聊天风格的智能聊天机器人。通过分析和学习微信聊天记录，Chat-Style-Bot能够模仿你的独特聊天风格，成为你的私人聊天助理。无论是与朋友交流还是处理日常对话，Chat-Style-Bot都能提供自然、个性化的互动体验。
