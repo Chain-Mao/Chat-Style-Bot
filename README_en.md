@@ -1,9 +1,9 @@
 <div align="center"><img src="assets/logo.jpg"/></div>
 
-Please select the language you use / 请选择您使用的语言 : \[ English | [中文](README_zh.md) \]
+Please select the language you use / 请选择您使用的语言 : \[ English | [中文](README.md) \]
 
 ## Project Overview
-Chat-Style-Bot is an intelligent chatbot designed to mimic the chatting style of a specified person. By analyzing and learning from WeChat chat logs, Chat-Style-Bot can emulate your unique chatting style, becoming your personal chat assistant. Whether communicating with friends or handling daily conversations, Chat-Style-Bot provides a natural and personalized interactive experience.
+Chat-Style-Bot is an intelligent chatbot specially designed to imitate the chatting style of a designated person. By analyzing and learning WeChat chat records, Chat-Style-Bot can imitate your unique speaking style (mantra, etc.) and can access WeChat to become your stand-in. In daily conversation scenarios such as communicating with friends, Chat-Style-Bot can provide a personalized and natural interactive experience.
 
 **Chat Style Mimicking Bot Integrated with WeChat Demonstration**
 
