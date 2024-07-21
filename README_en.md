@@ -325,7 +325,7 @@ The data format for KTO optimization is as follows. `user` represents the questi
 ```
 
 > [!TIP]
-> We have integrated human preference optimization strategies into wechat so that you can collect preference data in real time during wechat deployment and use it for subsequent preference optimization fine-tuning training.
+> We have integrated human preference optimization strategies into WeChat interface so that you can collect preference data in real time during WeChat deployment and use it for subsequent preference optimization fine-tuning training.
 >
 > For the DPO algorithm, the bot will have the probability to trigger two answers, you can type `1` or `2` to choose a more suitable answer for your chat style, and the data will be recorded in [data/dpo_records.json](data/dpo_records.json).
 >
