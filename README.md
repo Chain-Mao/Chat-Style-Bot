@@ -86,7 +86,7 @@ python scripts/preprocess.py --input_csv data/messages.csv --output_json data/ch
 
 <details><summary>可选数据说明</summary>
 
-在指令监督微调时，`instruction` 列对应的内容会与 `input` 列对应的内容拼接后作为人类指令，即人类指令为 `instruction/ninput`。而 `output` 列对应的内容为模型回答。
+在指令监督微调时，`instruction` 列对应的内容会与 `input` 列对应的内容拼接后作为人类指令，即人类指令为 `instruction\ninput`。而 `output` 列对应的内容为模型回答。
 
 如果指定，`system` 列对应的内容将被作为系统提示词。
 
