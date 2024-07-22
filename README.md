@@ -86,7 +86,7 @@ python scripts/preprocess.py --input_csv data/messages.csv --output_json data/ch
 
 <details><summary>可选数据说明</summary>
 
-在指令监督微调时，`instruction` 列对应的内容会与 `input` 列对应的内容拼接后作为人类指令，即人类指令为 `instruction\ninput`。而 `output` 列对应的内容为模型回答。
+在指令监督微调时，`instruction` 列对应的内容会与 `input` 列对应的内容拼接后作为人类指令，即人类指令为 `instruction/ninput`。而 `output` 列对应的内容为模型回答。
 
 如果指定，`system` 列对应的内容将被作为系统提示词。
 
@@ -114,7 +114,7 @@ python scripts/preprocess.py --input_csv data/messages.csv --output_json data/ch
 python scripts/id_tag.py --name ZhangSan --author LiSi --file_path data/identity.json
 ```
 
-如果您不需要身份认证，可以在 如[config\train\llama3_lora_sft_ds3.yaml](config\train\llama3_lora_sft_ds3.yaml) 等模型配置文件中更改`dataset`条目，仅保留`chat_records`即可。
+如果您不需要身份认证，可以在 如[config/train/llama3_lora_sft_ds3.yaml](config/train/llama3_lora_sft_ds3.yaml) 等模型配置文件中更改`dataset`条目，仅保留`chat_records`即可。
 
 ## 模型下载
 
@@ -268,7 +268,7 @@ python scripts/wechat.py
 llamafactory-cli train config/train/llama3_lora_dpo.yaml
 ```
 
-DPO 优化的数据格式如下，其中 `conversations` 表示提问问题，`choesn` 表示您更倾向的回答，`rejected` 表示您更不倾向的回答，具体示例参考 [data\dpo_zh_demo.json](data\dpo_zh_demo.json)。
+DPO 优化的数据格式如下，其中 `conversations` 表示提问问题，`choesn` 表示您更倾向的回答，`rejected` 表示您更不倾向的回答，具体示例参考 [data/dpo_zh_demo.json](data/dpo_zh_demo.json)。
 
 ```json
 {
@@ -295,7 +295,7 @@ DPO 优化的数据格式如下，其中 `conversations` 表示提问问题，`c
 llamafactory-cli train config/train/llama3_lora_kto.yaml
 ```
 
-KTO 优化的数据格式如下，其中 `user` 表示问题，`assistant` 表示回答，您满意的回答标记为 `true`，您不满意的回答标记为 `false`，具体示例参考 [data\kto_en_demo.json](data\kto_en_demo.json)。
+KTO 优化的数据格式如下，其中 `user` 表示问题，`assistant` 表示回答，您满意的回答标记为 `true`，您不满意的回答标记为 `false`，具体示例参考 [data/kto_en_demo.json](data/kto_en_demo.json)。
 
 ```json
 {
@@ -361,17 +361,17 @@ llamafactory-cli train config/train/llama3_lora_pretrain.yaml
 
 </details>
 
-如果需要导入自己的数据集，您可以在数据集配置文件[data\dataset_info.json](data\dataset_info.json)中添加自定义的数据集，并在config中.yaml模型配置文件的`dataset`条目中添加数据集名称。
+如果需要导入自己的数据集，您可以在数据集配置文件[data/dataset_info.json](data/dataset_info.json)中添加自定义的数据集，并在config中.yaml模型配置文件的`dataset`条目中添加数据集名称。
 
 
 ## 检索增强生成
 
-为了实现各模型与历史聊天数据的连接，我们接入了 LlamaIndex 并提供了教程案例[scripts\rag.py](scripts\rag.py)，旨在帮助用户利用 LlamaIndex 与 llama3、qwen2、glm4 等模型快速部署检索增强生成（RAG）技术。结合 RAG 后的模型会进一步提升风格模仿能力和细节问题的准确性。
+为了实现各模型与历史聊天数据的连接，我们接入了 LlamaIndex 并提供了教程案例[scripts/rag.py](scripts/rag.py)，旨在帮助用户利用 LlamaIndex 与 llama3、qwen2、glm4 等模型快速部署检索增强生成（RAG）技术。结合 RAG 后的模型会进一步提升风格模仿能力和细节问题的准确性。
 
 在案例中，我们需要设置语言模型、向量模型和聊天记录的路径，并执行以下命令：
 
 ```bash
-python scripts\rag.py --model llama3
+python scripts/rag.py --model llama3
 ```
 
 对于向量模型，您可以使用`bge-base-en-v1.5`模型来检索英文文档，下载`bge-base-zh-v1.5`模型以检索中文文档。根据您的计算资源，您还可以选择`bge-large`或`bge-small`作为向量模型，或调整上下文窗口大小或文本块大小。
