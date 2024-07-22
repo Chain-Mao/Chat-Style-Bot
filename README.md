@@ -347,7 +347,7 @@ KTO 优化的数据格式如下，其中 `user` 表示问题，`assistant` 表�
 }
 ```
 
-本项目提供了预处理后的名人普通文本数据，如[特朗普](data\trump.json)和[马斯克](data\elon_musk.json)发布的推特内容。您可以通过以下命令进行增量预训练。
+本项目提供了预处理后的名人普通文本数据，如[特朗普](data/trump.json)和[马斯克](data/elon_musk.json)发布的推特内容。您可以通过以下命令进行增量预训练。
 
 ```bash
 llamafactory-cli train config/train/llama3_lora_pretrain.yaml
