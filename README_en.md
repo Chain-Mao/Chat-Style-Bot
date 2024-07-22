@@ -110,7 +110,7 @@ You can replace the tags with the required information by executing the followin
 python scripts/id_tag.py --name ZhangSan --author LiSi --file_path data/identity.json
 ```
 
-If you do not need authentication, you can change the `dataset` entry in a model configuration file such as [config\train\llama3_lora_sft_ds3.yaml](config\train\llama3_lora_sft_ds3.yaml), just keep `chat_records`.
+If you do not need authentication, you can change the `dataset` entry in a model configuration file such as [config/train/llama3_lora_sft_ds3.yaml](config/train/llama3_lora_sft_ds3.yaml), just keep `chat_records`.
 
 
 ## Model Download
@@ -266,7 +266,7 @@ If you want to further optimize the model to align its chatting style more close
 llamafactory-cli train config/train/llama3_lora_dpo.yaml
 ```
 
-The data format for DPO optimization is as follows. `conversations` represents the question, `choesn` represents the answer you prefer, and `rejected` represents the answer you do not prefer. Refer to [data\dpo_zh_demo.json](data\dpo_zh_demo.json) for a specific example.
+The data format for DPO optimization is as follows. `conversations` represents the question, `choesn` represents the answer you prefer, and `rejected` represents the answer you do not prefer. Refer to [data/dpo_zh_demo.json](data/dpo_zh_demo.json) for a specific example.
 
 ```json
 {
@@ -293,7 +293,7 @@ The data format for DPO optimization is as follows. `conversations` represents t
 llamafactory-cli train config/train/llama3_lora_kto.yaml
 ```
 
-The data format for KTO optimization is as follows. `user` represents the question, and `assistant` represents the answer. Label the answer you are satisfied with as `true` and the one you are not satisfied with as `false`. Refer to [data\kto_en_demo.json](data\kto_en_demo.json) for a specific example.
+The data format for KTO optimization is as follows. `user` represents the question, and `assistant` represents the answer. Label the answer you are satisfied with as `true` and the one you are not satisfied with as `false`. Refer to [data/kto_en_demo.json](data/kto_en_demo.json) for a specific example.
 
 ```json
 {
@@ -345,7 +345,7 @@ If your training data is plain text rather than question-and-answer format, you 
 }
 ```
 
-This project provides preprocessed plain text data from celebrities, such as tweets posted by [Trump](data\trump.json) and [Elon Musk](data\elon_musk.json). You can perform incremental pretraining using the following command:
+This project provides preprocessed plain text data from celebrities, such as tweets posted by [Trump](data/trump.json) and [Elon Musk](data/elon_musk.json). You can perform incremental pretraining using the following command:
 
 ```bash
 llamafactory-cli train config/train/llama3_lora_pretrain.yaml
@@ -359,17 +359,17 @@ If you encounter the `weight must be 2-D` problem, use `pip install -e ".[torch,
 
 </details>
 
-If you need to import your own dataset, you can add your custom dataset in the dataset configuration file [data\dataset_info.json](data\dataset_info.json), and add the dataset name in the `dataset` entry of the model configuration file .yaml in the config directory.
+If you need to import your own dataset, you can add your custom dataset in the dataset configuration file [data/dataset_info.json](data/dataset_info.json), and add the dataset name in the `dataset` entry of the model configuration file .yaml in the config directory.
 
 
 ## Retrieval Augmented Generation
 
-In order to connect each model with historical chat data, we connect LlamaIndex and provide a tutorial example [scripts\rag.py](scripts\rag.py). It is designed to help users quickly deploy RAG technology using LlamaIndex and llama3, qwen2, glm4 and other models. The model combined with RAG will further improve the style imitation ability and the accuracy of details.
+In order to connect each model with historical chat data, we connect LlamaIndex and provide a tutorial example [scripts/rag.py](scripts/rag.py). It is designed to help users quickly deploy RAG technology using LlamaIndex and llama3, qwen2, glm4 and other models. The model combined with RAG will further improve the style imitation ability and the accuracy of details.
 
 In our case, we need to set up the language model, vector model, and chat history path, and execute the following command:
 
 ```bash
-python scripts\rag.py --model llama3
+python scripts/rag.py --model llama3
 ```
 
 For the vector model, you can use the `burge-base-en-v1.5` model to retrieve English documents and download the `burge-base-en-v1.5` model to retrieve Chinese documents. Depending on your computing resources, you can also choose `bge-large` or `bge-small` as a vector model, or adjust the context window size or text block size.
